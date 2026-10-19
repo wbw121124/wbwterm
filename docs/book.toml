@@ -1,0 +1,12 @@
+# Copyright (c) wbwterm contributors. Licensed under MPL-2.0.
+
+[book]
+authors = ["wbwterm contributors"]
+language = "zh"
+multilingual = false
+src = "src"
+title = "wbwterm 文档"
+
+[output.html]
+mathjax-support = false
+curly-quotes = true

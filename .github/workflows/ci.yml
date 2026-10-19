@@ -1,0 +1,82 @@
+# Copyright (c) wbwterm contributors. Licensed under MPL-2.0.
+
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  fmt:
+    name: 格式检查
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - run: cargo fmt --all --check
+
+  clippy:
+    name: Clippy 检查
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - run: cargo clippy -- -D warnings
+
+  test:
+    name: 单元测试
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test
+
+  build-gnu:
+    name: 构建 x86_64-pc-windows-gnu
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-gnu
+      - run: cargo build --target x86_64-pc-windows-gnu --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wbwterm-x86_64-pc-windows-gnu
+          path: target/x86_64-pc-windows-gnu/release/wbwterm.exe
+
+  build-msys2:
+    name: 构建（MSYS2 环境）
+    uses: msys2/setup-msys2@v2
+    with:
+      msystem: MINGW64
+      update: true
+      install: >-
+        git
+        make
+        mingw-w64-x86_64-toolchain
+        mingw-w64-x86_64-cargo
+        mingw-w64-x86_64-rust-src
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup target add x86_64-pc-windows-gnu
+      - run: cargo build --target x86_64-pc-windows-gnu --release
+
+  docs:
+    name: 构建文档
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo doc --no-deps
+      - uses: peaceiris/actions-gh-pages@v4
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./target/doc

@@ -1,0 +1,45 @@
+# Copyright (c) wbwterm contributors. Licensed under MPL-2.0.
+
+[package]
+name = "wbwterm"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+license = "MPL-2.0"
+description = "高性能 Windows 终端模拟器，不经过 conhost/OpenConsole"
+repository = "https://github.com/wbwterm/wbwterm"
+readme = "README.md"
+
+[dependencies]
+# 窗口管理
+winit = "0.30"
+raw-window-handle = "0.6"
+
+# GPU 渲染（DX12）
+wgpu = { version = "23", default-features = false, features = ["dx12"] }
+glyphon = "0.12"
+
+# VT 解析
+vte = "0.15"
+wezterm-bidi = "0.2"
+unicode-general-category = "1.1"
+unicode-width = "0.1"
+
+# IPC
+interprocess = "2.4"
+windows-sys = { version = "0.59", features = [
+    "Win32_Foundation",
+    "Win32_System_Pipes",
+    "Win32_Security",
+    "Win32_System_Threading",
+    "Win32_UI_Shell",
+] }
+
+# 事件轮询
+polling = "3.11"
+crossbeam-channel = "0.5"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+strip = true
