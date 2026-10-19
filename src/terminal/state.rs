@@ -134,7 +134,7 @@ impl TerminalState {
             let mut row = Vec::with_capacity(cols as usize);
             for c in 0..cols {
                 if c < old_cols {
-                    if let Some(old_row) = self.grid.get(old_rows as usize) {
+                    if let Some(old_row) = self.grid.get(r as usize) {
                         if let Some(cell) = old_row.get(c as usize) {
                             row.push(cell.clone());
                         } else {
@@ -150,6 +150,21 @@ impl TerminalState {
             new_grid.push(row);
         }
         self.grid = new_grid;
+    }
+
+    /// RIS — Full Reset（ANSI ESC c）
+    pub fn reset(&mut self) {
+        self.cursor = Cursor::default();
+        self.saved_cursor = None;
+        self.modes = ModeFlags::default();
+        self.title.clear();
+        self.dirty_rows.clear();
+        // 清空网格
+        for row in &mut self.grid {
+            for cell in row.iter_mut() {
+                *cell = Cell::default();
+            }
+        }
     }
 
     /// 获取指定格子的可见宽度

@@ -34,10 +34,12 @@ impl TerminalEngine {
 
     /// 向终端注入 VT 字节流
     pub fn feed(&mut self, input: &[u8]) {
+        use crate::terminal::engine::TerminalPerform;
         self.parser.advance(
             &mut TerminalPerform {
                 state: &mut self.state,
                 events: &mut self.events,
+                sgr: Default::default(),
             },
             input,
         );
