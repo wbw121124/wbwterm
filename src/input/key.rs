@@ -8,7 +8,7 @@
 //! - XTerm 兼容：方向键、功能键
 
 use winit::event::KeyEvent;
-use winit::keyboard::{PhysicalKey, KeyCode};
+use winit::keyboard::{KeyCode, PhysicalKey};
 
 /// 将 winit KeyEvent 编码为 VT 序列字节
 pub fn key_event_to_vt(key_event: &KeyEvent) -> Option<Vec<u8>> {

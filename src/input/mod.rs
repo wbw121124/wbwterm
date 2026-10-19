@@ -9,9 +9,9 @@
 pub mod key;
 pub mod mouse;
 
-use winit::event::{Event, WindowEvent};
 use crate::input::key::{key_event_to_vt, unicode_input_to_vt};
 use crate::input::mouse::MouseProtocol;
+use winit::event::{Event, WindowEvent};
 
 /// 输入处理器
 pub struct InputHandler {
@@ -32,7 +32,9 @@ impl InputHandler {
         self.vt_output.clear();
         if let Event::WindowEvent { event, .. } = event {
             match event {
-                WindowEvent::KeyboardInput { event: key_event, .. } => {
+                WindowEvent::KeyboardInput {
+                    event: key_event, ..
+                } => {
                     if let Some(t) = &key_event.text {
                         self.vt_output.extend(unicode_input_to_vt(t));
                     }

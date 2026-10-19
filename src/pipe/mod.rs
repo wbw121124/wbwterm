@@ -6,16 +6,16 @@ pub mod inherited;
 pub mod named_pipe;
 pub mod session;
 
-use std::process::Command;
-use super::terminal::TerminalEngine;
 use super::terminal::events::TerminalEvents;
+use super::terminal::TerminalEngine;
+use std::process::Command;
 
 /// 管道通信模式
 #[derive(Clone, Debug, Default)]
 pub enum PipeMode {
     #[default]
-    Inherited,  // 模式 A：继承句柄
-    NamedPipe,  // 模式 B：命名管道
+    Inherited, // 模式 A：继承句柄
+    NamedPipe, // 模式 B：命名管道
 }
 
 /// 管道会话配置

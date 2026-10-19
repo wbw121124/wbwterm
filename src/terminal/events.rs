@@ -2,8 +2,8 @@
 
 //! 终端侧边事件 — bell / title / clipboard / size_report 等
 
-use std::sync::{Arc, Mutex};
 use std::collections::VecDeque;
+use std::sync::{Arc, Mutex};
 
 /// 终端侧边事件
 #[derive(Clone, Debug)]

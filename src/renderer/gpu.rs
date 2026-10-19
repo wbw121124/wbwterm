@@ -28,11 +28,7 @@ impl GpuRenderer {
     /// 创建 GPU 渲染器（wgpu Device + Surface）
     ///
     /// TODO: P3 阶段完善，当前保留接口骨架
-    pub async fn new(
-        _surface: Surface<'static>,
-        _width: u32,
-        _height: u32,
-    ) -> Self {
+    pub async fn new(_surface: Surface<'static>, _width: u32, _height: u32) -> Self {
         // TODO: 初始化 wgpu Instance、Adapter、Device
         // self.config = SurfaceConfiguration { width, height, format, ... };
         Self {

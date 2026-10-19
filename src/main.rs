@@ -2,13 +2,13 @@
 
 //! 主入口 — 解析命令行参数并启动 App
 
+mod app;
 mod config;
-mod terminal;
+mod font;
+mod input;
 mod pipe;
 mod renderer;
-mod input;
-mod font;
-mod app;
+mod terminal;
 
 fn main() {
     let config = config::Config::from_args();

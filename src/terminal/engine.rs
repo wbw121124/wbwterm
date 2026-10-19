@@ -4,10 +4,10 @@
 //!
 //! 将 vte 解析出的每个动作映射到 TerminalState 的状态变更。
 
-use vte::{Params, Perform};
-use super::state::{Cell, TerminalState};
 use super::events::TerminalEvent;
+use super::state::{Cell, TerminalState};
 use unicode_width::UnicodeWidthChar;
+use vte::{Params, Perform};
 
 /// vte Perform 实现
 pub struct TerminalPerform<'a> {
@@ -17,7 +17,8 @@ pub struct TerminalPerform<'a> {
 
 /// 从 Params 中提取第一个参数的第一个值（i64）
 fn param_first_i64(params: &Params) -> Option<i64> {
-    params.iter()
+    params
+        .iter()
         .next()
         .and_then(|p| p.first())
         .copied()
@@ -53,18 +54,29 @@ impl<'a> Perform for TerminalPerform<'a> {
     fn execute(&mut self, byte: u8) {
         match byte {
             0x07 => self.events.push(TerminalEvent::Bell),
-            0x08 => { self.state.cursor.col = self.state.cursor.col.saturating_sub(1); }
+            0x08 => {
+                self.state.cursor.col = self.state.cursor.col.saturating_sub(1);
+            }
             0x09 => {}
             0x0A => {
-                self.state.cursor.row = (self.state.cursor.row + 1).min(self.state.rows as usize - 1);
+                self.state.cursor.row =
+                    (self.state.cursor.row + 1).min(self.state.rows as usize - 1);
                 self.state.mark_dirty(self.state.cursor.row);
             }
-            0x0D => { self.state.cursor.col = 0; }
+            0x0D => {
+                self.state.cursor.col = 0;
+            }
             _ => {}
         }
     }
 
-    fn csi_dispatch(&mut self, params: &Params, _intermediates: &[u8], _ignore: bool, _action: char) {
+    fn csi_dispatch(
+        &mut self,
+        params: &Params,
+        _intermediates: &[u8],
+        _ignore: bool,
+        _action: char,
+    ) {
         match _action as u8 {
             b'm' => self.handle_sgr(params),
             b'A' => self.handle_cuu(params),
@@ -82,7 +94,9 @@ impl<'a> Perform for TerminalPerform<'a> {
     }
 
     fn osc_dispatch(&mut self, params: &[&[u8]], _bell_terminated: bool) {
-        if params.is_empty() { return; }
+        if params.is_empty() {
+            return;
+        }
         match params[0] {
             b"0" => {
                 if params.len() >= 2 {
@@ -160,7 +174,11 @@ impl<'a> TerminalPerform<'a> {
         match mode {
             0 => {
                 for r in row..self.state.rows as usize {
-                    let start = if r == row { self.state.cursor.col + 1 } else { 0 };
+                    let start = if r == row {
+                        self.state.cursor.col + 1
+                    } else {
+                        0
+                    };
                     for c in start..self.state.cols as usize {
                         self.state.grid[r][c] = Cell::default();
                     }
@@ -212,7 +230,8 @@ impl<'a> TerminalPerform<'a> {
         if req == 6 {
             let r = self.state.cursor.row + 1;
             let c = self.state.cursor.col + 1;
-            self.events.push(TerminalEvent::UnknownSequence(format!("\x1b[{};{}R", r, c)));
+            self.events
+                .push(TerminalEvent::UnknownSequence(format!("\x1b[{};{}R", r, c)));
         }
     }
 }

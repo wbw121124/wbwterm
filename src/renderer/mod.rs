@@ -8,11 +8,11 @@
 //! - `screen`: 脏行追踪 + 帧合成
 
 pub mod gpu;
-pub mod text;
 pub mod screen;
+pub mod text;
 
-use winit::window::Window;
 use crate::terminal::TerminalEngine;
+use winit::window::Window;
 
 /// 渲染器主结构体
 pub struct Renderer {
@@ -26,13 +26,14 @@ impl Renderer {
     pub async fn new(_window: Window) -> Self {
         // TODO: P3 阶段完善
         let _font = text::FontContext::new();
-        let _gpu = gpu::GpuRenderer::new(
-            panic!("P3: wgpu Surface 未初始化"),
-            800, 600
-        ).await;
+        let _gpu = gpu::GpuRenderer::new(panic!("P3: wgpu Surface 未初始化"), 800, 600).await;
         let _screen = screen::ScreenRenderer::new(panic!("P3"));
 
-        Self { _gpu, _font, _screen }
+        Self {
+            _gpu,
+            _font,
+            _screen,
+        }
     }
 
     /// 窗口 resize 时调用

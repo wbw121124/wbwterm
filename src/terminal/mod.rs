@@ -8,13 +8,13 @@
 //! - `events`: 终端侧边事件（bell / title / clipboard / size report 等）
 
 pub mod engine;
-pub mod state;
 pub mod events;
+pub mod state;
 
-use vte::Parser;
-use crate::terminal::state::TerminalState;
-use crate::terminal::events::TerminalEvents;
 use crate::terminal::engine::TerminalPerform;
+use crate::terminal::events::TerminalEvents;
+use crate::terminal::state::TerminalState;
+use vte::Parser;
 
 /// VT 终端引擎
 pub struct TerminalEngine {
@@ -34,10 +34,13 @@ impl TerminalEngine {
 
     /// 向终端注入 VT 字节流
     pub fn feed(&mut self, input: &[u8]) {
-        self.parser.advance(&mut TerminalPerform {
-            state: &mut self.state,
-            events: &mut self.events,
-        }, input);
+        self.parser.advance(
+            &mut TerminalPerform {
+                state: &mut self.state,
+                events: &mut self.events,
+            },
+            input,
+        );
     }
 
     /// 查询侧边事件队列（非阻塞）
@@ -48,7 +51,8 @@ impl TerminalEngine {
     /// 窗口尺寸变化时调用
     pub fn resize(&mut self, cols: u16, rows: u16) {
         self.state.resize(cols, rows);
-        self.events.push(events::TerminalEvent::SizeChanged(cols, rows));
+        self.events
+            .push(events::TerminalEvent::SizeChanged(cols, rows));
     }
 
     /// 获取终端状态快照（供渲染层使用）

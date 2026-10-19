@@ -3,13 +3,13 @@
 //! App 主结构体 — 整合窗口、终端引擎、管道、渲染
 
 use winit::application::ApplicationHandler;
-use winit::event::{Event, WindowEvent, StartCause};
+use winit::event::{Event, StartCause, WindowEvent};
 use winit::event_loop::{ActiveEventLoop, EventLoop};
 use winit::window::{Window, WindowAttributes};
 
 use crate::config::Config;
-use crate::terminal::TerminalEngine;
 use crate::input::key::{key_event_to_vt, unicode_input_to_vt};
+use crate::terminal::TerminalEngine;
 
 /// App 主结构体
 pub struct App {
@@ -43,7 +43,9 @@ impl App {
                 self.config.cols as f64 * 10.0,
                 self.config.rows as f64 * 18.0,
             ));
-        let window = event_loop.create_window(attrs).expect("Failed to create window");
+        let window = event_loop
+            .create_window(attrs)
+            .expect("Failed to create window");
         self.window = Some(window);
         println!("窗口创建成功: {}x{}", self.config.cols, self.config.rows);
     }
@@ -77,13 +79,20 @@ impl ApplicationHandler for App {
         }
     }
 
-    fn window_event(&mut self, _event_loop: &ActiveEventLoop, _window_id: winit::window::WindowId, event: WindowEvent) {
+    fn window_event(
+        &mut self,
+        _event_loop: &ActiveEventLoop,
+        _window_id: winit::window::WindowId,
+        event: WindowEvent,
+    ) {
         match event {
             WindowEvent::CloseRequested => {
                 println!("收到关闭请求，退出");
                 _event_loop.exit();
             }
-            WindowEvent::KeyboardInput { event: key_event, .. } => {
+            WindowEvent::KeyboardInput {
+                event: key_event, ..
+            } => {
                 if let Some(engine) = &mut self.engine {
                     if let Some(text) = &key_event.text {
                         engine.feed(text.as_bytes());

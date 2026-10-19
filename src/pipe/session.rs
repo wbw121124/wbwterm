@@ -9,9 +9,9 @@
 //! App 输入 ──► write_thread() ──► 管道写端
 //! ```
 
+use crossbeam_channel::{unbounded, Receiver, Sender};
 use std::sync::mpsc;
 use std::thread;
-use crossbeam_channel::{Sender, Receiver, unbounded};
 
 /// 读写线程句柄
 #[derive(Clone)]
@@ -33,12 +33,12 @@ pub struct Session {
 
 impl Session {
     /// 创建新会话（管道读写线程已启动）
-    pub fn new(
-        stdin_tx: Sender<Vec<u8>>,
-        stdout_rx: Receiver<Vec<u8>>,
-    ) -> Self {
+    pub fn new(stdin_tx: Sender<Vec<u8>>, stdout_rx: Receiver<Vec<u8>>) -> Self {
         Self {
-            handles: SessionHandles { tx: stdin_tx, rx: stdout_rx },
+            handles: SessionHandles {
+                tx: stdin_tx,
+                rx: stdout_rx,
+            },
             read_handle: None,
             write_handle: None,
         }

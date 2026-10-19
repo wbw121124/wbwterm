@@ -15,8 +15,8 @@
 //! - 需要跨用户边界或远程主机连接的场景
 //! - 标准 shell（bash/cmd）使用继承句柄模式（A）更简单
 
-use interprocess::local_socket::{Listener, Stream};
 use interprocess::local_socket::prelude::*;
+use interprocess::local_socket::{Listener, Stream};
 
 /// 命名管道服务端配置
 #[derive(Clone, Debug)]

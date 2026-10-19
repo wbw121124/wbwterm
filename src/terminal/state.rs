@@ -154,7 +154,9 @@ impl TerminalState {
 
     /// 获取指定格子的可见宽度
     pub fn cell_width(&self, col: usize, row: usize) -> usize {
-        if row >= self.rows as usize { return 0; }
+        if row >= self.rows as usize {
+            return 0;
+        }
         let ch = self.grid[row].get(col).map(|c| c.ch).unwrap_or(' ');
         ch.width().unwrap_or(0)
     }
