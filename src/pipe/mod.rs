@@ -14,8 +14,8 @@ use std::process::Command;
 #[derive(Clone, Debug, Default)]
 pub enum PipeMode {
     #[default]
-    Inherited, // 模式 A：继承句柄
-    NamedPipe, // 模式 B：命名管道
+    Inherited,
+    NamedPipe,
 }
 
 /// 管道会话配置
@@ -41,27 +41,19 @@ impl PipeConfig {
 /// 管道启动结果
 #[derive(Debug)]
 pub enum PipeResult {
-    /// 子进程成功启动，返回读写句柄和 PID
     Ok {
-        /// 子进程的 stdin 写入端（Terminal 写→子进程读）
         stdin: std::os::windows::io::OwnedHandle,
-        /// 子进程的 stdout/stderr 读取端（子进程写→Terminal 读）
         stdout: std::os::windows::io::OwnedHandle,
-        /// 子进程 PID（用于生命周期管理）
         pid: u32,
     },
-    /// 命名管道客户端连接
     NamedPipeConnected {
         stream: interprocess::local_socket::Stream,
         pid: u32,
     },
-    /// 启动失败
     Error(String),
 }
 
 /// 管道管理器
-///
-/// 封装子进程启动、管道读写线程、VT 引擎一体化管理
 pub struct PipeManager {
     pub config: PipeConfig,
     pub engine: std::sync::Arc<std::sync::Mutex<TerminalEngine>>,
@@ -82,11 +74,6 @@ impl PipeManager {
         }
     }
 
-    /// 根据配置启动子进程，启动读写线程
-    ///
-    /// ## 返回值
-    /// - `Ok(PipeResult)`: 成功启动，返回管道句柄
-    /// - `Err(String)`: 启动失败
     pub fn spawn(&mut self) -> Result<PipeResult, String> {
         match self.config.mode {
             PipeMode::Inherited => self.spawn_inherited(),
@@ -94,7 +81,6 @@ impl PipeManager {
         }
     }
 
-    /// 模式 A：继承句柄模式
     fn spawn_inherited(&mut self) -> Result<PipeResult, String> {
         let cmd = &self.config.command;
         let exe = cmd
@@ -132,12 +118,10 @@ impl PipeManager {
         })
     }
 
-    /// 模式 B：命名管道模式（待实现）
     fn spawn_named_pipe(&mut self) -> Result<PipeResult, String> {
         Err("命名管道模式尚未实现".to_string())
     }
 
-    /// 将用户输入字节流写入子进程 stdin
     pub fn write_to_child(&self, data: &[u8]) -> Result<(), String> {
         if let Some(ref session) = self.session {
             session.write(data.to_vec())
@@ -146,12 +130,10 @@ impl PipeManager {
         }
     }
 
-    /// 获取 VT 引擎引用
     pub fn engine_ref(&self) -> std::sync::Arc<std::sync::Mutex<TerminalEngine>> {
         self.engine.clone()
     }
 
-    /// 获取事件分发器引用
     pub fn events_ref(&self) -> std::sync::Arc<std::sync::Mutex<TerminalEvents>> {
         self.events.clone()
     }
