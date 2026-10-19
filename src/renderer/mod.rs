@@ -26,7 +26,9 @@ impl Renderer {
     pub async fn new(_window: Window) -> Self {
         // TODO: P3 阶段完善
         let _font = text::FontContext::new();
+        #[allow(clippy::diverging_sub_expression)]
         let _gpu = gpu::GpuRenderer::new(panic!("P3: wgpu Surface 未初始化"), 800, 600).await;
+        #[allow(clippy::diverging_sub_expression)]
         let _screen = screen::ScreenRenderer::new(panic!("P3"));
 
         Self {

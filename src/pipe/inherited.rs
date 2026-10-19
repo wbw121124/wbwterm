@@ -19,10 +19,10 @@ use std::ptr;
 use windows_sys::Win32::Security::SECURITY_ATTRIBUTES;
 use windows_sys::Win32::System::Pipes::CreatePipe;
 use windows_sys::Win32::System::Threading::{
-    CreateProcessW, DeleteProcThreadAttributeList, EXTENDED_STARTUPINFO_PRESENT,
-    GetCurrentProcess, InitializeProcThreadAttributeList, PROCESS_INFORMATION,
-    PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, STARTF_USESTDHANDLES, STARTUPINFOEXW,
-    UpdateProcThreadAttribute,
+    CreateProcessW, DeleteProcThreadAttributeList, GetCurrentProcess,
+    InitializeProcThreadAttributeList, UpdateProcThreadAttribute, EXTENDED_STARTUPINFO_PRESENT,
+    PROCESS_INFORMATION, PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, STARTF_USESTDHANDLES,
+    STARTUPINFOEXW,
 };
 
 /// 继承句柄模式的管道配置
@@ -140,12 +140,7 @@ pub fn spawn_inherited(config: &InheritedPipeConfig) -> Result<InheritedPipe, St
     // =========================================================
     let mut attr_list_size: usize = 0;
     unsafe {
-        InitializeProcThreadAttributeList(
-            ptr::null_mut(),
-            1,
-            0,
-            &mut attr_list_size,
-        );
+        InitializeProcThreadAttributeList(ptr::null_mut(), 1, 0, &mut attr_list_size);
     }
     if attr_list_size == 0 {
         return Err("InitializeProcThreadAttributeList 查询大小失败".to_string());
@@ -159,12 +154,7 @@ pub fn spawn_inherited(config: &InheritedPipeConfig) -> Result<InheritedPipe, St
     // Step 3: 初始化属性列表
     // =========================================================
     unsafe {
-        let ok = InitializeProcThreadAttributeList(
-            attr_list_ptr,
-            1,
-            0,
-            &mut attr_list_size,
-        );
+        let ok = InitializeProcThreadAttributeList(attr_list_ptr, 1, 0, &mut attr_list_size);
         if ok == 0 {
             return Err("InitializeProcThreadAttributeList 失败".to_string());
         }
@@ -195,14 +185,12 @@ pub fn spawn_inherited(config: &InheritedPipeConfig) -> Result<InheritedPipe, St
     // Step 5: 构建 STARTUPINFOEXW
     // =========================================================
     let mut startup_info: STARTUPINFOEXW = unsafe { std::mem::zeroed() };
-    unsafe {
-        startup_info.StartupInfo.cb = std::mem::size_of::<STARTUPINFOEXW>() as u32;
-        startup_info.StartupInfo.dwFlags = STARTF_USESTDHANDLES;
-        startup_info.StartupInfo.hStdInput = h_read_pipe;       // 子进程 stdin ← 管道读端
-        startup_info.StartupInfo.hStdOutput = h_write_pipe;     // 子进程 stdout → 管道写端
-        startup_info.StartupInfo.hStdError = h_write_pipe;      // 子进程 stderr → 管道写端（复用）
-        startup_info.lpAttributeList = attr_list_ptr;
-    }
+    startup_info.StartupInfo.cb = std::mem::size_of::<STARTUPINFOEXW>() as u32;
+    startup_info.StartupInfo.dwFlags = STARTF_USESTDHANDLES;
+    startup_info.StartupInfo.hStdInput = h_read_pipe;
+    startup_info.StartupInfo.hStdOutput = h_write_pipe;
+    startup_info.StartupInfo.hStdError = h_write_pipe;
+    startup_info.lpAttributeList = attr_list_ptr;
 
     // =========================================================
     // Step 6: 构建命令行（UTF-16 LE）
@@ -215,16 +203,16 @@ pub fn spawn_inherited(config: &InheritedPipeConfig) -> Result<InheritedPipe, St
     unsafe {
         let mut proc_info: PROCESS_INFORMATION = std::mem::zeroed();
         let ok = CreateProcessW(
-            ptr::null(),                          // lpApplicationName
-            cmd_wide.as_ptr() as _,               // lpCommandLine（mutable，UTF-16）
-            ptr::null(),                          // lpProcessAttributes
-            ptr::null(),                          // lpThreadAttributes
-            1,                                    // bInheritHandles = TRUE
-            EXTENDED_STARTUPINFO_PRESENT,         // dwCreationFlags
-            ptr::null(),                          // lpEnvironment
-            ptr::null(),                          // lpCurrentDirectory
+            ptr::null(),                           // lpApplicationName
+            cmd_wide.as_ptr() as _,                // lpCommandLine（mutable，UTF-16）
+            ptr::null(),                           // lpProcessAttributes
+            ptr::null(),                           // lpThreadAttributes
+            1,                                     // bInheritHandles = TRUE
+            EXTENDED_STARTUPINFO_PRESENT,          // dwCreationFlags
+            ptr::null(),                           // lpEnvironment
+            ptr::null(),                           // lpCurrentDirectory
             &startup_info as *const _ as *const _, // lpStartupInfo
-            &mut proc_info as *mut _ as *mut _,   // lpProcessInformation
+            &mut proc_info as *mut _ as *mut _,    // lpProcessInformation
         );
 
         DeleteProcThreadAttributeList(attr_list_ptr);

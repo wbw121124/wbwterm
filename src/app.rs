@@ -3,12 +3,12 @@
 //! App 主结构体 — 整合窗口、终端引擎、管道、渲染
 
 use winit::application::ApplicationHandler;
-use winit::event::{Event, StartCause, WindowEvent};
+use winit::event::{StartCause, WindowEvent};
 use winit::event_loop::{ActiveEventLoop, EventLoop};
 use winit::window::{Window, WindowAttributes};
 
 use crate::config::Config;
-use crate::input::key::{key_event_to_vt, unicode_input_to_vt};
+use crate::input::key::key_event_to_vt;
 use crate::terminal::TerminalEngine;
 
 /// App 主结构体

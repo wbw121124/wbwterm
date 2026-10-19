@@ -28,21 +28,20 @@ impl InputHandler {
     }
 
     /// 处理窗口事件，返回 VT 序列（可能为空）
+    #[allow(clippy::single_match, clippy::collapsible_match)]
     pub fn handle_event(&mut self, event: &Event<()>) {
         self.vt_output.clear();
         if let Event::WindowEvent { event, .. } = event {
-            match event {
-                WindowEvent::KeyboardInput {
-                    event: key_event, ..
-                } => {
-                    if let Some(t) = &key_event.text {
-                        self.vt_output.extend(unicode_input_to_vt(t));
-                    }
-                    if let Some(vt_seq) = key_event_to_vt(key_event) {
-                        self.vt_output.extend(vt_seq);
-                    }
+            if let WindowEvent::KeyboardInput {
+                event: key_event, ..
+            } = event
+            {
+                if let Some(t) = &key_event.text {
+                    self.vt_output.extend(unicode_input_to_vt(t));
                 }
-                _ => {}
+                if let Some(vt_seq) = key_event_to_vt(key_event) {
+                    self.vt_output.extend(vt_seq);
+                }
             }
         }
     }

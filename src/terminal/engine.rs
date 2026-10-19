@@ -97,26 +97,18 @@ impl<'a> Perform for TerminalPerform<'a> {
         if params.is_empty() {
             return;
         }
-        match params[0] {
-            b"0" => {
-                if params.len() >= 2 {
-                    let title = String::from_utf8_lossy(params[1]).into_owned();
-                    self.state.title = title.clone();
-                    self.events.push(TerminalEvent::TitleChanged(title));
-                }
-            }
-            _ => {}
+        if params[0] == b"0" && params.len() >= 2 {
+            let title = String::from_utf8_lossy(params[1]).into_owned();
+            self.state.title = title.clone();
+            self.events.push(TerminalEvent::TitleChanged(title));
         }
     }
 
     fn esc_dispatch(&mut self, _intermediates: &[u8], _ignore: bool, byte: u8) {
-        match byte {
-            b'c' => {
-                // RIS — Full Reset
-                self.state.cursor = super::state::Cursor::default();
-                self.state.mark_dirty_range(0, self.state.rows as usize - 1);
-            }
-            _ => {}
+        if byte == b'c' {
+            // RIS — Full Reset
+            self.state.cursor = super::state::Cursor::default();
+            self.state.mark_dirty_range(0, self.state.rows as usize - 1);
         }
     }
 }

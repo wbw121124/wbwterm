@@ -2,6 +2,17 @@
 
 //! 主入口 — 解析命令行参数并启动 App
 
+#![allow(
+    dead_code,
+    unused_imports,
+    unused_variables,
+    unreachable_code,
+    unreachable_patterns,
+    unused_must_use,
+    clippy::new_without_default,
+    clippy::upper_case_acronyms
+)]
+
 mod app;
 mod config;
 mod font;
