@@ -27,14 +27,30 @@ struct RendererInner {
 
 impl Renderer {
     /// 创建渲染器（初始化 wgpu 设备 + glyphon 字体上下文）
-    pub async fn new(window: &Window, font_size: f32) -> Self {
+    ///
+    /// ## 参数
+    /// - `font_family`: 用户指定字体族（空/"auto" 走候选链）
+    /// - `font_size`: 字号（pt）
+    /// - `font_dirs`: 自定义字体目录/文件
+    pub async fn new(
+        window: &Window,
+        font_family: &str,
+        font_size: f32,
+        font_dirs: &[String],
+    ) -> Self {
         let gpu = gpu::GpuRenderer::new(window).await;
-        let font_context = text::FontContext::new(&gpu.device, &gpu.queue);
+        let font_context = text::FontContext::new(&gpu.device, &gpu.queue, font_family, font_dirs);
+        let resolved_family = font_context.resolved_family.clone();
+        let mono_count = font_context.enumerate_mono().len();
         let screen = screen::ScreenRenderer::new(
             gpu.device.clone(),
             gpu.queue.clone(),
             font_context,
             font_size,
+        );
+        eprintln!(
+            "字体解析: {}（等宽候选 {} 个）",
+            resolved_family, mono_count
         );
         Self {
             inner: Arc::new(Mutex::new(RendererInner { gpu, screen })),
@@ -45,6 +61,11 @@ impl Renderer {
     pub fn resize(&self, window: &Window) {
         let mut inner = self.inner.lock().unwrap();
         inner.gpu.resize(window);
+    }
+
+    /// 当前单元格尺寸（宽, 高）px
+    pub fn cell_size(&self) -> (u32, u32) {
+        self.inner.lock().unwrap().screen.cell_size()
     }
 
     /// 终端尺寸变化时更新渲染器

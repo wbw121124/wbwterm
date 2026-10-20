@@ -13,6 +13,8 @@ pub struct Config {
     pub rows: u16,
     pub font: String,
     pub font_size: f32,
+    /// 自定义字体目录（--font-dir 可重复指定）
+    pub font_dirs: Vec<String>,
     pub title: String,
 }
 
@@ -69,6 +71,12 @@ impl Config {
                         config.font_size = args[i].parse().unwrap_or(14.0);
                     }
                 }
+                "--font-dir" => {
+                    if i + 1 < args.len() {
+                        i += 1;
+                        config.font_dirs.push(args[i].clone());
+                    }
+                }
                 "--title" => {
                     if i + 1 < args.len() {
                         i += 1;
@@ -114,6 +122,7 @@ impl Default for Config {
             rows: 24,
             font: "Cascadia Code".to_string(),
             font_size: 14.0,
+            font_dirs: Vec::new(),
             title: "wbwterm".to_string(),
         }
     }

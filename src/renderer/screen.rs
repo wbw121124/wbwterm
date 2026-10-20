@@ -34,10 +34,12 @@ pub struct ScreenRenderer {
 impl ScreenRenderer {
     /// 创建屏幕渲染器
     pub fn new(device: Device, queue: Queue, font_context: FontContext, font_size: f32) -> Self {
-        // 等宽字体近似：1pt ≈ 1px @ 96 DPI，但终端通常用 14pt ≈ 16px
-        let scale = font_size / 14.0;
-        let cell_w = (10.0 * scale) as u32;
-        let cell_h = (18.0 * scale) as u32;
+        // pt → px（96 DPI）：px = pt × 96 / 72 = pt × 4/3
+        let size_px = font_size * 96.0 / 72.0;
+        // 等宽字体典型度量：字符 advance ≈ 0.6em，行高 ≈ 1.22em
+        // 14pt Cascadia Code → ≈12×23px（与 Windows Terminal 一致）
+        let cell_w = (size_px * 0.6).ceil() as u32;
+        let cell_h = (size_px * 1.22).ceil() as u32;
 
         Self {
             device,
@@ -47,8 +49,8 @@ impl ScreenRenderer {
             cols: 80,
             rows: 24,
             font_size,
-            cell_width: cell_w.max(8),
-            cell_height: cell_h.max(12),
+            cell_width: cell_w.clamp(4, 64),
+            cell_height: cell_h.clamp(8, 128),
         }
     }
 
@@ -78,6 +80,11 @@ impl ScreenRenderer {
     /// 获取脏行集合（供外部迭代）
     pub fn dirty_rows(&self) -> &BTreeSet<usize> {
         &self.dirty_rows
+    }
+
+    /// 当前单元格尺寸（宽, 高）px
+    pub fn cell_size(&self) -> (u32, u32) {
+        (self.cell_width, self.cell_height)
     }
 
     /// 合成并重绘所有脏行

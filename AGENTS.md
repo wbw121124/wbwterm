@@ -130,36 +130,36 @@ wbwterm [选项] [--] [命令]
 # ██ 实施阶段 / PHASES
 # ████████████████████████████████████████████████████████████████
 
-## P0 基础（当前）
+## P0 基础
 - [x] git init
 - [x] Cargo 项目初始化
-- [ ] 完善 Cargo.toml（所有 deps）
-- [ ] src/main.rs 空壳（能编译通过）
-- [ ] .gitignore、README.md、AGENTS.md
-- [ ] .github/workflows/ci.yml
+- [x] 完善 Cargo.toml（所有 deps）
+- [x] src/main.rs 空壳（能编译通过）
+- [x] .gitignore、README.md、AGENTS.md
+- [x] .github/workflows/ci.yml
 
 ## P1 管道层
-- [ ] pipe/inherited.rs — CreatePipe + CreateProcessW
-- [ ] pipe/named_pipe.rs — NamedPipe W server/client
-- [ ] pipe/session.rs — 读写线程 + channel
-- [ ] subprocess.rs — 子进程生命周期管理
+- [x] pipe/inherited.rs — CreatePipe + CreateProcessW
+- [ ] pipe/named_pipe.rs — NamedPipe server/client（模式 B 暂为 Err 桩）
+- [x] pipe/session.rs — 读写线程 + channel
+- [x] subprocess.rs — 子进程生命周期管理
 
 ## P2 VT 引擎
-- [ ] terminal/engine.rs — vte Parser + TerminalPerform impl
-- [ ] terminal/state.rs — Grid、Cursor、Scrollback、Mode
-- [ ] terminal/events.rs — 侧边事件回调
+- [x] terminal/engine.rs — vte Parser + TerminalPerform impl
+- [x] terminal/state.rs — Grid、Cursor、Scrollback、Mode
+- [x] terminal/events.rs — 侧边事件回调
 
 ## P3 渲染
-- [ ] renderer/gpu.rs — wgpu 初始化（DX12）
-- [ ] renderer/text.rs — glyphon FontContext + Atlas
-- [ ] renderer/screen.rs — 脏行追踪 + wgpu 绘制
+- [x] renderer/gpu.rs — wgpu 初始化（DX12）
+- [x] renderer/text.rs — glyphon FontContext + Atlas
+- [ ] renderer/screen.rs — 脏行追踪 + wgpu 绘制（glyphon 管线 TODO）
 
 ## P4 输入
-- [ ] input/key.rs — winit KeyEvent → VT 序列
-- [ ] input/mouse.rs — 鼠标事件 → VT 序列
+- [x] input/key.rs — winit KeyEvent → VT 序列
+- [x] input/mouse.rs — 鼠标事件 → VT 序列
 
 ## P5 完善
-- [ ] font/ — Windows 系统字体枚举
+- [x] font/ — Windows 系统字体枚举（fontdb FontRegistry）
 - [ ] 配置加载（TOML）
 - [ ] 颜色主题
 - [ ] Scrollback 滚动支持
@@ -168,3 +168,20 @@ wbwterm [选项] [--] [命令]
 - [ ] 单元测试
 - [ ] docs.rs 文档
 - [ ] GitHub Release 打包 .exe
+
+---
+
+## 进展记录 / PROGRESS
+### 2026-10-20 字体系统 + App 完整接线
+- fontdb 0.23 升为直接依赖（cosmic-text 0.19 亦依赖 0.23，版本统一）
+- `font/mod.rs`：`FontRegistry` 封装 fontdb — 系统字体、自定义目录/文件加载、
+  `resolve_chain()`（用户字体 → MONO_CANDIDATES → Consolas）、`enumerate_mono()`
+- `config.rs`：新增 `font_dirs: Vec<String>` 与 `--font-dir` CLI（可重复）
+- `renderer/text.rs`：`FontContext` 接收 font_family/font_dirs，自定义目录同时
+  写入 glyphon `font_system.db_mut()` 与独立 FontRegistry
+- `renderer/screen.rs`：真实 pt→px 度量（14pt → 12×23px，与 Windows Terminal 一致）
+- `app.rs`：App 采用 PipeManager 内部引擎 `Arc<Mutex<TerminalEngine>>`；
+  键盘输入优先 `write_to_child`，无子进程时本地回显
+- `main.rs`：取消注释 `app.run()`，程序完整启动
+- 验证：cargo build/test/clippy 全绿；实地冒烟 — bash.exe 子进程启动、
+  17 个等宽字体候选枚举成功、Cascadia Code 14pt → 12×23px 单元

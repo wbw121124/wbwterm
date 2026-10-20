@@ -19,6 +19,12 @@ raw-window-handle = "0.6"
 wgpu = { version = "30", default-features = false, features = ["dx12"] }
 glyphon = "0.12"
 
+# 字体枚举（系统 + 自定义目录）
+fontdb = "0.23"
+
+# wgpu 异步初始化（阻塞运行时）
+pollster = "0.4"
+
 # VT 解析
 vte = "0.15"
 wezterm-bidi = "0.2"
